@@ -1,0 +1,174 @@
+                                     osgSprites 
+
+I.  Description
+
+osgSprites is a complete node kit for diplaying large fields of sprite objects in OSG.  
+The osgSprites library uses a geometry shader to render geometry aligned to screen 
+space.  This has some drawbacks but these are worth the advantages, as it allows the 
+rendering of one million trees with best of breed graphics gaming cards (2009).  
+
+
+II.  Usage
+
+There are three methods for using osgSprites.  Programatically, by generating a 
+.sprites file, or by embedding the Sprites extension in a .osg file.  In any case, 
+osgSprites build the tree forest with two sets of information:
+
+    o A Texture Palette. 
+    --------------------
+
+    This texture palette is expected to have a palette of RGBA images of sprites.  Each image
+    is referenced by index, starting from the lower left hand corner and counting right.  Each
+    palette will have M rows and N columns, with 1 or more rows and 1 or more columns.
+
+
+    o A list of Sprite Data
+
+    The SpriteData consists a list of tuples each with the following pieces of information:
+
+        a. width x height the sprite
+        b. palette index
+        c. position (X,Y,Z) of the sprite
+
+This information is passed to the osgSprite library by one of the three methods of usage:
+
+A.  Using osgSprites Programatically
+
+Use the C++ osgSprites::Sprites interface.  Sprites derives from osg::Geode.
+The following is an example C++ code example for using 
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    static const unsigned int numTrees = 4000;
+    
+    osg::Geode *loadTrees()
+    {
+        // Open the pallete texture
+        osg::ref_ptr<osg::Image> treePaletteImage = osgDB::readImageFile( "trees.png" );
+        if( !treePaletteImage.valid() )
+        {
+            osg::notify( osg::WARN ) << "Can't open the tree palette image \"trees.png\"" << std::endl;
+            return NULL;
+        }
+    
+        // Make the Palette
+        osg::ref_ptr<osgSprites::TexturePalette> texturePalette = 
+                new osgSprites::TexturePalette( 1, 5, treePaletteImage.get() );
+    
+    
+        // Invent some random tree positions 
+        float area = sqrt((double)numTrees)/2.0;
+        osgSprites::Sprites::SpriteDataList dataList;
+        for( unsigned int i = 0; i < numTrees; i++ )
+        {
+            osgSprites::Sprites::SpriteData treeData;
+    
+            treeData.width  = 2.0f + ((float)(rand()%1000)/1000.0f) * 2.0f;
+            treeData.height = 4.0f + ((float)(rand()%1000)/1000.0f) * 4.0f;
+            treeData.paletteIndex = rand() % 5;
+    
+            treeData.position[0] = -(area*0.5) + ((float)(rand() % 10000)/10000.0f) * area;
+            treeData.position[1] = -(area*0.5) + ((float)(rand() % 10000)/10000.0f) * area;
+            treeData.position[2] = 0.0f;
+    
+            dataList.push_back( treeData );
+        }
+    
+    
+        // Create the Sprite Trees
+        osg::ref_ptr<osgSprites::Sprites> trees = new osgSprites::Sprites( dataList );
+        trees->setTexturePalette( texturePalette.get() );
+    
+        /// Hang 'em on a Geode
+        osg::Geode *geode = new osg::Geode;
+        geode->addDrawable( trees.get() );
+    
+        return geode;
+    }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+B. Using osgSprites in a .sprites file.
+
+.trees files are XML files with three tags: <Sprite>, <TexturePalette> and <SpriteData>.  The following is an 
+example .sprites file:
+
+    <Sprites>
+        <TexturePalette  imageFile="trees.png"  numRows="1"  numCols="5"    />
+        <SpriteData  width="0.7704"  height="1.232"  paletteIndex="1">
+            <Position  x="-29.255"  y="-26.621"  z="0"        />
+    
+        </SpriteData>
+        <SpriteData  width="0.7704"  height="1.232"  paletteIndex="1">
+            <Position  x="-30.053"  y="-45.737"  z="0"        />
+    
+        </SpriteData>
+        <SpriteData  width="0.7704"  height="1.232"  paletteIndex="1">
+            <Position  x="-49.823"  y="-26.711"  z="0"        />
+    
+        </SpriteData>
+        <SpriteData  width="0.7704"  height="1.232"  paletteIndex="1">
+            <Position  x="-22.484"  y="-32.792"  z="0"        />
+    
+        </SpriteData>
+    
+    </Sprites>
+
+
+The .sprites file is parsed with the osgdb_sprites loader.
+
+
+C. Extending the .osg file format
+
+The following is an extended .osg file format supporting Sprites:
+
+    Geode {
+      name "example.trees"
+      nodeMask 0xffffffff
+      cullingActive TRUE
+      num_drawables 1
+
+      osgSprites::Sprites {
+        UniqueID Sprites_0
+        TexturePalette {
+          fileName "trees.png"
+          numRows  1
+          numCols  5
+        }
+        Comment { 
+          SpriteData records: 
+          width height paletteIndex X Y Z
+        }
+        SpriteData { 
+          0.7704  1.232  1  -2.9255 -2.6621 0
+          0.7704  1.232  2  -1.0053 -2.5737 0
+          0.7704  1.232  3  -1.9823 -2.6711 0
+          0.7704  1.232  4  -2.2484 -1.2792 0
+        }
+      }
+
+    }
+
+
+
+III.  Building osgSprites
+
+A. on Non-windows using DWMake
+
+    1. In the root directory, type 'make'
+
+       % make
+
+    2. Install the libraries in their target location (by hand) as appropriate 
+
+        % sudo cp lib/Linux64/libosgSprites.so@  /usr/local/lib64        
+        % sudo cp lib/Linux64/osgdb_*.so /usr/local/lib64/osgPlugins-2.8.2/
+
+    3. Optionally, if you need the development headers
+
+        % sudo cp include/osgSprites/ /usr/local/include/
+
+   
+B. Using CMake
+
+   If targeting Makefiles, PLEASE MAKE OUT OF SOURCE BUILDS as they will conflict with the
+   GNUmakefiles of DWMake
+

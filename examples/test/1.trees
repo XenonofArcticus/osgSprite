@@ -1,0 +1,20 @@
+<Sprites>
+    <TexturePalette  imageFile="FILE_NAME_WAS_NOT_STORED_IN_IMAGE"  numRows="0"  numCols="0"    />
+    <TreeSpriteData  width="1.0239e+12"  height="7.03621e+22"  paletteIndex="1885434439">
+        <Position  x="-2.9255"  y="-2.6621"  z="0"        />
+
+    </TreeSpriteData>
+    <TreeSpriteData  width="1.0239e+12"  height="7.03621e+22"  paletteIndex="1885434439">
+        <Position  x="-1.0053"  y="-2.5737"  z="0"        />
+
+    </TreeSpriteData>
+    <TreeSpriteData  width="1.0239e+12"  height="7.03621e+22"  paletteIndex="1885434439">
+        <Position  x="-1.9823"  y="-2.6711"  z="0"        />
+
+    </TreeSpriteData>
+    <TreeSpriteData  width="1.0239e+12"  height="7.03621e+22"  paletteIndex="1885434439">
+        <Position  x="-2.2484"  y="-1.2792"  z="0"        />
+
+    </TreeSpriteData>
+
+</Sprites>
