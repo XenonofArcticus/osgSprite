@@ -1,9 +1,10 @@
 #include <osg/Notify>
 #include <osgDB/ReadFile>
+#include <osgDB/FileUtils>
 #include <osgViewer/Viewer>
 #include <osgSprites/Sprites.h>
 #include <osgSprites/TexturePalette.h>
-
+#include <osgGA/TrackballManipulator>
 
 static const unsigned int numTrees = 4000;
 
@@ -33,27 +34,31 @@ osg::Geode *loadTrees()
     osgSprites::Sprites * trees = new osgSprites::Sprites( dataList );
 
     // Open the pallete texture
-    osg::ref_ptr<osg::Image> treePaletteImage = osgDB::readImageFile( "trees.png" );
+    osg::ref_ptr<osg::Image> treePaletteImage = osgDB::readImageFile( osgDB::findDataFile("trees.png") );
     if( treePaletteImage.valid() )
     {
         // Make the Palette
         osg::ref_ptr<osgSprites::TexturePalette> texturePalette = new osgSprites::TexturePalette( 1, 5, treePaletteImage.get() );
         trees->setTexturePalette( texturePalette.get() );
     }
-    else
+    else{
         osg::notify( osg::WARN ) << "Can't open the tree palette image \"trees.png\"" << std::endl;
-
+		int t = 0;
+		std::cin >> t;
+	}
     return trees;
 }
 
 
 int main(int, char **)
 {
+	osg::setNotifyLevel(osg::WARN);
     osgViewer::Viewer viewer;
 
-    viewer.setSceneData( loadTrees() );
+	viewer.setCameraManipulator(new osgGA::TrackballManipulator());
 
-    return viewer.run();
+	viewer.setSceneData( loadTrees() );
+	return viewer.run();
 }
 
 
