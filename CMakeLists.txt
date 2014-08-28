@@ -7,11 +7,8 @@ PROJECT(${ProjectName})
 
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
 
-foreach( L OpenThreads osg osgDB OpenGL )
+foreach( L OpenThreads osg osgDB osgViewer osgGA OpenGL )
     find_package( ${L} )
-endforeach( L )
-foreach( L Chaskii )
-    find_package( ${L} QUIET )
 endforeach( L )
 
 IF(UNIX)
@@ -55,4 +52,5 @@ SET(LIBRARY_OUTPUT_PATH ${OUTPUT_LIBDIR})
 
 
 add_subdirectory(src)
+add_subdirectory(examples)
 
