@@ -3,7 +3,9 @@
 namespace osgSprites {
 
 TexturePalette::TexturePalette( ) 
-{}
+{
+	this->setResizeNonPowerOfTwoHint(false);
+}
 
 TexturePalette::TexturePalette( 
     unsigned int rows,
@@ -13,6 +15,7 @@ TexturePalette::TexturePalette(
     _numRows( rows ),
     _numCols( cols )
 {
+	this->setResizeNonPowerOfTwoHint(false);
 }
 
 void TexturePalette::setNumRows( unsigned int nr )

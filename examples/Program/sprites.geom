@@ -15,7 +15,6 @@ uniform int palette_cols;
 //const float max_width = 1.0;
 //const float max_height = 2.0;
 
-
 void main(void)
 {
     if( palette_cols == 0 || palette_rows == 0 )
@@ -56,6 +55,7 @@ void main(void)
 
         gl_TexCoord[0] =  vec4( s1, t1, 0.0, 1.0 );
         gl_Position = p3;
+		
         EmitVertex();
     }
     EndPrimitive();

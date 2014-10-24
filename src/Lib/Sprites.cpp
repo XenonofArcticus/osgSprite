@@ -127,9 +127,11 @@ void Sprites::setSpriteList( const SpriteDataList &l )
     _spriteDataList = l;
     _numSprites = _spriteDataList.size();
 
+	OSG_ALWAYS << "Sprites: Num Sprites: " << _numSprites << std::endl;
+
     osg::Geometry *geom = new osg::Geometry;
     geom->setVertexArray( coords );
-    geom->setColorArray( data );
+	geom->setTexCoordArray(0, data);
     geom->addPrimitiveSet( new osg::DrawArrays( GL_POINTS, 0, _numSprites ));
 
     if( getNumDrawables() > 0 )
@@ -167,6 +169,7 @@ void Sprites::_init()
     else
         program->addShader(new osg::Shader(osg::Shader::GEOMETRY, geometryShaderSource));
 
+	//program->addBindAttribLocation("_spriteData", 5);
     program->setParameter( GL_GEOMETRY_INPUT_TYPE_EXT, GL_POINTS );
     program->setParameter( GL_GEOMETRY_OUTPUT_TYPE_EXT, GL_QUADS );
     program->setParameter( GL_GEOMETRY_VERTICES_OUT_EXT, 4 );

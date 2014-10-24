@@ -7,7 +7,7 @@
 #include <osgGA/TrackballManipulator>
 
 static const unsigned int numTrees = 4000;
-
+/*
 osg::Geode *loadTrees()
 {
 
@@ -34,7 +34,7 @@ osg::Geode *loadTrees()
     osgSprites::Sprites * trees = new osgSprites::Sprites( dataList );
 
     // Open the pallete texture
-    osg::ref_ptr<osg::Image> treePaletteImage = osgDB::readImageFile( osgDB::findDataFile("trees.png") );
+    osg::ref_ptr<osg::Image> treePaletteImage = osgDB::readImageFile( osgDB::findDataFile("./data/trees.png") );
     if( treePaletteImage.valid() )
     {
         // Make the Palette
@@ -60,5 +60,57 @@ int main(int, char **)
 	viewer.setSceneData( loadTrees() );
 	return viewer.run();
 }
+*/
 
 
+#include <osg/Notify>
+#include <osgViewer/Viewer>
+#include <osgEarthUtil/EarthManipulator>
+#include <osgEarthUtil/ExampleResources>
+#include <osgEarthFeatures/Filter>
+
+#define LC "[viewer] "
+
+using namespace osgEarth;
+using namespace osgEarth::Features;
+using namespace osgEarth::Util;
+
+int
+main(int argc, char** argv)
+{    
+    //Run this example with the the feature_custom_filters.earth file in the tests directory for a simple example
+    osg::ArgumentParser arguments(&argc,argv);
+    if ( arguments.read("--stencil") )
+        osg::DisplaySettings::instance()->setMinimumNumStencilBits( 8 );
+
+    // create a viewer:
+    osgViewer::Viewer viewer(arguments);
+
+    //Tell the database pager to not modify the unref settings
+    viewer.getDatabasePager()->setUnrefImageDataAfterApplyPolicy( false, false );
+
+    // install our default manipulator (do this before calling load)
+    viewer.setCameraManipulator( new EarthManipulator() );
+
+	osgEarth::setNotifyLevel(osg::FATAL);
+
+    // load an earth file, and support all or our example command-line options
+    // and earth file <external> tags    
+    osg::Node* node = MapNodeHelper().load( arguments, &viewer );
+    if ( node )
+    {
+        viewer.setSceneData( node );
+
+        // configure the near/far so we don't clip things that are up close
+        viewer.getCamera()->setNearFarRatio(0.00002);
+
+        viewer.run();
+    }
+    else
+    {
+        OE_NOTICE 
+            << "\nUsage: " << argv[0] << " file.earth" << std::endl
+            << MapNodeHelper().usage() << std::endl;
+    }
+    return 0;
+}
