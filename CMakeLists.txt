@@ -7,9 +7,12 @@ PROJECT(${ProjectName})
 
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
 
-foreach( L OpenThreads osg osgDB osgViewer osgGA OpenGL )
-    find_package( ${L} )
-endforeach( L )
+# Good place to look for the OSG 3rd party libs
+SET(THIRD_PARTY_DIR "" CACHE PATH "OSG 3rd-party dependency folder")
+
+
+FIND_PACKAGE(OpenGL)
+FIND_PACKAGE(OSG)
 
 IF(UNIX)
     # Some Unicies need explicit linkage to the Math library or the build fails.
@@ -46,10 +49,31 @@ ENDIF("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 
 ################################################################################
 
+SET(OUTPUT_BINDIR ${PROJECT_BINARY_DIR}/bin)
+MAKE_DIRECTORY(${OUTPUT_BINDIR})
+
 SET(OUTPUT_LIBDIR ${PROJECT_BINARY_DIR}/lib)
 MAKE_DIRECTORY(${OUTPUT_LIBDIR})
 SET(LIBRARY_OUTPUT_PATH ${OUTPUT_LIBDIR})
 
+# If CMake >= 2.6.0
+SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_LIBDIR})
+SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BINDIR})
+IF(WIN32)
+	SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_BINDIR})
+ELSE(WIN32)
+	SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_LIBDIR})
+ENDIF(WIN32)
+
+# Dynamic vs Static Linking
+OPTION(DYNAMIC_OSGSPRITES "Set to ON to build OSGEARTH for dynamic linking.  Use OFF for static." ON)
+IF   (DYNAMIC_OSGSPRITES)
+    SET(OSGSPRITES_USER_DEFINED_DYNAMIC_OR_STATIC "SHARED")
+ELSE (DYNAMIC_OSGSPRITES)
+    SET(OSGSPRITES_USER_DEFINED_DYNAMIC_OR_STATIC "STATIC")
+ENDIF(DYNAMIC_OSGSPRITES)
+
+INCLUDE(osgSpritesMacroUtils)
 
 add_subdirectory(src)
 add_subdirectory(examples)

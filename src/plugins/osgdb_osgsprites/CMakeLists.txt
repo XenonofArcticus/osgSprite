@@ -1,0 +1,23 @@
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include 
+					${OPENTHREADS_INCLUDE_DIR}
+					${OSGDB_INCLUDE_DIR} 
+					${OSG_INCLUDE_DIR})
+
+IF(WIN32)
+ADD_DEFINITIONS(-DOSGSPRITES_LIBRARY)
+ENDIF (WIN32)
+
+SET(TARGET_SRC IO_Sprites.cpp)
+	
+SET(TARGET_LIBRARIES_VARS OSG_LIBRARY 
+							OSGDB_LIBRARY 
+							osgSprites)
+
+
+
+SETUP_PLUGIN(osgdb_osgsprites)
+
+
+# to install public driver includes:
+SET(LIB_NAME osgdb_osgsprites)
+SET(LIB_PUBLIC_HEADERS ${TARGET_H})

@@ -8,7 +8,7 @@ namespace osgSprites {
 static const char *vertexShaderSource = 
     "void main()\n"
     "{\n"
-    "    gl_FrontColor = gl_Color;\n"
+    "    gl_FrontColor = gl_MultiTexCoord0;;\n"
     "    gl_Position = ftransform();\n"
     "}\n";
 
@@ -151,19 +151,19 @@ void Sprites::_init()
     osg::Program* program = new osg::Program;
     sset->setAttribute(program);
 
-    std::string vertShaderFile = osgDB::findDataFile( "sprites.vert" );
+    std::string vertShaderFile = osgDB::findDataFile( "data/sprites.vert" );
     if( !vertShaderFile.empty() )
         program->addShader(osg::Shader::readShaderFile(osg::Shader::VERTEX, vertShaderFile ) );
     else
         program->addShader(new osg::Shader(osg::Shader::VERTEX, vertexShaderSource));
 
-    std::string fragShaderFile = osgDB::findDataFile( "sprites.frag" );
+    std::string fragShaderFile = osgDB::findDataFile( "data/sprites.frag" );
     if( !fragShaderFile.empty() )
         program->addShader(osg::Shader::readShaderFile(osg::Shader::FRAGMENT, fragShaderFile ) );
     else
         program->addShader(new osg::Shader(osg::Shader::FRAGMENT, fragmentShaderSource));
 
-    std::string geomShaderFile = osgDB::findDataFile("sprites.geom");
+    std::string geomShaderFile = osgDB::findDataFile("data/sprites.geom");
     if( !geomShaderFile.empty() )
         program->addShader(osg::Shader::readShaderFile(osg::Shader::GEOMETRY, geomShaderFile ));
     else

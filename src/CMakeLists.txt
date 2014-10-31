@@ -1,2 +1,2 @@
-add_subdirectory( Lib )
-add_subdirectory( Plugin )
+add_subdirectory( osgSprites )
+add_subdirectory( plugins )
