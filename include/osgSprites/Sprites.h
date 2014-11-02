@@ -87,9 +87,9 @@ class OSGSPRITES_EXPORT Sprites: public osg::Geode
 		// shaderFile will be used to find shaderFile + .vert, shaderFile + .geom and shaderFile + .frag
 		// e.g if shaders are data/myspriteshader.vert, data/myspriteshader.geom and data/myspriteshader.frag
 		// then pass data/myspriteshader, any that is not found will use default shader source in code
-        Sprites(const std::string &shaderFile = "", const RenderMode &renderMode = RenderMode::GEOMETRY_SHADER_SPRITES);
+        Sprites(const std::string &shaderFile = "", const RenderMode &renderMode = GEOMETRY_SHADER_SPRITES);
 	    Sprites(const Sprites&, const osg::CopyOp&);
-        Sprites(const SpriteDataList &, const std::string &shaderFile = "", const bool& useUpVector = false, const RenderMode &renderMode = RenderMode::GEOMETRY_SHADER_SPRITES);
+        Sprites(const SpriteDataList &, const std::string &shaderFile = "", const bool& useUpVector = false, const RenderMode &renderMode = GEOMETRY_SHADER_SPRITES);
 
         void setTexturePalette( TexturePalette * );
         TexturePalette *getTexturePalette() const;

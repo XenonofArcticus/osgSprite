@@ -135,7 +135,7 @@ void Sprites::setSpriteList( const SpriteDataList &l, const bool &useUpVector )
     {
         coords->push_back(  p->position );
         data->push_back( osg::Vec3f( p->width, p->height, float(p->paletteIndex) ) );
-		if(_useUpVector && _renderMode == RenderMode::GEOMETRY_SHADER_SPRITES)
+		if(_useUpVector && _renderMode == GEOMETRY_SHADER_SPRITES)
 			ups->push_back(p->up);
     }
 
@@ -147,7 +147,7 @@ void Sprites::setSpriteList( const SpriteDataList &l, const bool &useUpVector )
     osg::Geometry *geom = new osg::Geometry;
     geom->setVertexArray( coords );
 	geom->setTexCoordArray(0, data);
-	if(_useUpVector && _renderMode == RenderMode::GEOMETRY_SHADER_SPRITES)
+	if(_useUpVector && _renderMode == GEOMETRY_SHADER_SPRITES)
 		geom->setTexCoordArray(1, ups);
     geom->addPrimitiveSet( new osg::DrawArrays( GL_POINTS, 0, _numSprites ));
 
@@ -165,7 +165,7 @@ const Sprites::SpriteDataList &Sprites::getSpriteList() const
 
 void Sprites::_init(const std::string &shaderFile)
 {
-	std::string defaultShader = _renderMode == RenderMode::GEOMETRY_SHADER_SPRITES ? "data/sprites" : "data/pointsprites";
+	std::string defaultShader = _renderMode == GEOMETRY_SHADER_SPRITES ? "data/sprites" : "data/pointsprites";
 	std::string shaderBase = shaderFile.empty() ? defaultShader : shaderFile;
     
 	osg::StateSet *sset = getOrCreateStateSet();
@@ -189,7 +189,7 @@ void Sprites::_init(const std::string &shaderFile)
 
 	}
 
-	if(_renderMode == RenderMode::GEOMETRY_SHADER_SPRITES)
+	if(_renderMode == GEOMETRY_SHADER_SPRITES)
 	{
 		std::string geomShaderFile = osgDB::findDataFile(shaderBase + ".geom");
 		if( !geomShaderFile.empty() )
@@ -203,7 +203,7 @@ void Sprites::_init(const std::string &shaderFile)
 		program->setParameter( GL_GEOMETRY_OUTPUT_TYPE_EXT, GL_QUADS );
 		program->setParameter( GL_GEOMETRY_VERTICES_OUT_EXT, 4 );
 
-	}else if(_renderMode == RenderMode::POINT_SPRITES) {
+	}else if(_renderMode == POINT_SPRITES) {
 		/// Setup the point sprites
 		osg::PointSprite *sprite = new osg::PointSprite();
 		sset->setTextureAttributeAndModes(0, sprite, osg::StateAttribute::ON);
