@@ -39,26 +39,38 @@ class OSGSPRITES_EXPORT Sprites: public osg::Geode
             float height;
             unsigned int paletteIndex;
             osg::Vec3f position;
+			osg::Vec3f up;
 
             SpriteData( float w, float h, unsigned int pi, const osg::Vec3f &p ):
                 width(w),
                 height(h),
-               paletteIndex(pi),
-                position(p ) 
+				paletteIndex(pi),
+                position(p),
+				up(osg::Vec3f(0,1,0))
+            {}
+
+				SpriteData( float w, float h, unsigned int pi, const osg::Vec3f &p, const osg::Vec3f &u ):
+                width(w),
+                height(h),
+				paletteIndex(pi),
+                position(p),
+				up(u)
             {}
 
             SpriteData() :
                 width(1.0),
                 height(2.0),
                 paletteIndex(0),
-                position(osg::Vec3f(0,0,0))
+                position(osg::Vec3f(0,0,0)),
+				up(osg::Vec3f(0,1,0))
             {}
 
             SpriteData( const SpriteData &d ):
                 width(d.width),
                 height(d.height),
                 paletteIndex(d.paletteIndex),
-                position(d.position)
+                position(d.position),
+				up(d.up)
             {
             }
 
@@ -66,26 +78,34 @@ class OSGSPRITES_EXPORT Sprites: public osg::Geode
 
         typedef std::vector<SpriteData> SpriteDataList;
 
-        Sprites();
+		//
+		// shaderFile will be used to find shaderFile + .vert, shaderFile + .geom and shaderFile + .frag
+		// e.g if shaders are data/myspriteshader.vert, data/myspriteshader.geom and data/myspriteshader.frag
+		// then pass data/myspriteshader, any that is not found will use default shader source in code
+        Sprites(const std::string &shaderFile = "");
 	    Sprites(const Sprites&, const osg::CopyOp&);
-        Sprites( const SpriteDataList & );
+        Sprites( const SpriteDataList &, const std::string &shaderFile = "", const bool& useUpVector = false);
 
         void setTexturePalette( TexturePalette * );
         TexturePalette *getTexturePalette() const;
 
-        void setSpriteList( const SpriteDataList & );
+        void setSpriteList( const SpriteDataList &, const bool& useUpVector = false);
         const SpriteDataList &getSpriteList() const;
 
         unsigned int getNumSprites() { return _numSprites; }
 
+		bool getUseUpVector() { return _useUpVector; }
+
     private:
         SpriteDataList _spriteDataList;
-        void _init();
+        void _init(const std::string &shaderFile);
         osg::ref_ptr<TexturePalette> _texturePalette;
         osg::ref_ptr<osg::Uniform> _palette_rows;
         osg::ref_ptr<osg::Uniform> _palette_cols;
 
         unsigned int _numSprites;
+
+		bool _useUpVector;
 };
 
 }

@@ -26,12 +26,14 @@ osg::Geode *loadTrees()
         treeData.position[1] = -(area*0.5) + ((float)(rand() % 10000)/10000.0f) * area;
         treeData.position[2] = 0.0f;
 
+		treeData.up = osg::Vec3(0,0,1);
+
         dataList.push_back( treeData );
     }
 
 
     // Create the Sprite Trees
-    osgSprites::Sprites * trees = new osgSprites::Sprites( dataList );
+    osgSprites::Sprites * trees = new osgSprites::Sprites( dataList, "data/upsprites", true );
 
     // Open the pallete texture
     osg::ref_ptr<osg::Image> treePaletteImage = osgDB::readImageFile( osgDB::findDataFile("./data/trees.png") );
