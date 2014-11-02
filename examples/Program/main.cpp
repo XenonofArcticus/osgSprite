@@ -5,8 +5,9 @@
 #include <osgSprites/Sprites.h>
 #include <osgSprites/TexturePalette.h>
 #include <osgGA/TrackballManipulator>
+#include <osgViewer/ViewerEventHandlers>
 
-static const unsigned int numTrees = 4000;
+static const unsigned int numTrees = 1000000;
 
 osg::Geode *loadTrees()
 {
@@ -20,6 +21,7 @@ osg::Geode *loadTrees()
 
         treeData.width  = 5.0f + ((float)(rand()%1000)/1000.0f) * 20.0f;
 	    treeData.height = 10.0f + ((float)(rand()%1000)/1000.0f) * 40.0f;
+
 	    treeData.paletteIndex = rand() % 5;
 
         treeData.position[0] = -(area*0.5) + ((float)(rand() % 10000)/10000.0f) * area;
@@ -33,7 +35,8 @@ osg::Geode *loadTrees()
 
 
     // Create the Sprite Trees
-    osgSprites::Sprites * trees = new osgSprites::Sprites( dataList, "data/upsprites", true );
+	//osgSprites::Sprites * trees = new osgSprites::Sprites( dataList );//, "", false, osgSprites::Sprites::RenderMode::POINT_SPRITES );
+    osgSprites::Sprites * trees = new osgSprites::Sprites( dataList, "data/upsprites", true ); //sprites have fixed up axis
 
     // Open the pallete texture
     osg::ref_ptr<osg::Image> treePaletteImage = osgDB::readImageFile( osgDB::findDataFile("./data/trees.png") );
@@ -58,6 +61,7 @@ int main(int, char **)
     osgViewer::Viewer viewer;
 
 	viewer.setCameraManipulator(new osgGA::TrackballManipulator());
+    viewer.addEventHandler(new osgViewer::StatsHandler);
 
 	viewer.setSceneData( loadTrees() );
 	return viewer.run();

@@ -1,6 +1,10 @@
-#include <osgDB/FileUtils>
-#include <osg/StateSet>
 #include <osgSprites/Sprites.h>
+
+#include <osg/StateSet>
+#include <osg/PointSprite>
+#include <osg/Point>
+#include <osgDB/FileUtils>
+
 
 namespace osgSprites {
 
@@ -79,16 +83,22 @@ static const char *fragmentShaderSource =
     "}\n";
 
 
-Sprites::Sprites(const std::string &shaderFile)
+Sprites::Sprites(const std::string &shaderFile, const RenderMode &renderMode)
+	: osg::Geode(),
+	_renderMode(renderMode)
 {
     _init(shaderFile);
 }
 
-Sprites::Sprites(const Sprites&, const osg::CopyOp&)
+Sprites::Sprites(const Sprites& sprite, const osg::CopyOp& op)
+	: osg::Geode(sprite, op),
+	_renderMode(sprite._renderMode)
 {
 }
 
-Sprites::Sprites( const SpriteDataList &l, const std::string &shaderFile, const bool& useUpVector )
+Sprites::Sprites( const SpriteDataList &l, const std::string &shaderFile, const bool& useUpVector, const RenderMode &renderMode)
+	: osg::Geode(),
+	_renderMode(renderMode)
 {
     setSpriteList( l, useUpVector );
     _init(shaderFile);
@@ -125,7 +135,7 @@ void Sprites::setSpriteList( const SpriteDataList &l, const bool &useUpVector )
     {
         coords->push_back(  p->position );
         data->push_back( osg::Vec3f( p->width, p->height, float(p->paletteIndex) ) );
-		if(_useUpVector)
+		if(_useUpVector && _renderMode == RenderMode::GEOMETRY_SHADER_SPRITES)
 			ups->push_back(p->up);
     }
 
@@ -137,7 +147,7 @@ void Sprites::setSpriteList( const SpriteDataList &l, const bool &useUpVector )
     osg::Geometry *geom = new osg::Geometry;
     geom->setVertexArray( coords );
 	geom->setTexCoordArray(0, data);
-	if(_useUpVector)
+	if(_useUpVector && _renderMode == RenderMode::GEOMETRY_SHADER_SPRITES)
 		geom->setTexCoordArray(1, ups);
     geom->addPrimitiveSet( new osg::DrawArrays( GL_POINTS, 0, _numSprites ));
 
@@ -145,6 +155,7 @@ void Sprites::setSpriteList( const SpriteDataList &l, const bool &useUpVector )
         replaceDrawable( getDrawable(0), geom );
     else
         addDrawable( geom );
+
 }
 
 const Sprites::SpriteDataList &Sprites::getSpriteList() const
@@ -154,8 +165,10 @@ const Sprites::SpriteDataList &Sprites::getSpriteList() const
 
 void Sprites::_init(const std::string &shaderFile)
 {
-	std::string shaderBase = shaderFile.empty() ? "data/sprites" : shaderFile;
-    osg::StateSet *sset = getOrCreateStateSet();
+	std::string defaultShader = _renderMode == RenderMode::GEOMETRY_SHADER_SPRITES ? "data/sprites" : "data/pointsprites";
+	std::string shaderBase = shaderFile.empty() ? defaultShader : shaderFile;
+    
+	osg::StateSet *sset = getOrCreateStateSet();
     osg::Program* program = new osg::Program;
     sset->setAttribute(program);
 
@@ -164,7 +177,7 @@ void Sprites::_init(const std::string &shaderFile)
         program->addShader(osg::Shader::readShaderFile(osg::Shader::VERTEX, vertShaderFile ) );
     else {
         program->addShader(new osg::Shader(osg::Shader::VERTEX, vertexShaderSource));
-		if(shaderBase == shaderFile) OSG_WARN << "osgSprites::_init: Failed to find .vert shader '" << shaderBase << ".vert' using default" << std::endl;
+		OSG_WARN << "osgSprites::_init: Failed to find .vert shader '" << shaderBase << ".vert' using default" << std::endl;
 	}
 
     std::string fragShaderFile = osgDB::findDataFile( shaderBase + ".frag" );
@@ -172,21 +185,30 @@ void Sprites::_init(const std::string &shaderFile)
         program->addShader(osg::Shader::readShaderFile(osg::Shader::FRAGMENT, fragShaderFile ) );
     else {
         program->addShader(new osg::Shader(osg::Shader::FRAGMENT, fragmentShaderSource));
-		if(shaderBase == shaderFile) OSG_WARN << "osgSprites::_init: Failed to find .frag shader '" << shaderBase << ".frag' using default" << std::endl;
+		OSG_WARN << "osgSprites::_init: Failed to find .frag shader '" << shaderBase << ".frag' using default" << std::endl;
 
 	}
 
-    std::string geomShaderFile = osgDB::findDataFile(shaderBase + ".geom");
-    if( !geomShaderFile.empty() )
-        program->addShader(osg::Shader::readShaderFile(osg::Shader::GEOMETRY, geomShaderFile ));
-    else {
-        program->addShader(new osg::Shader(osg::Shader::GEOMETRY, geometryShaderSource));
-		if(shaderBase == shaderFile) OSG_WARN << "osgSprites::_init: Failed to find .geom shader '" << shaderBase << ".geom' using default" << std::endl;
+	if(_renderMode == RenderMode::GEOMETRY_SHADER_SPRITES)
+	{
+		std::string geomShaderFile = osgDB::findDataFile(shaderBase + ".geom");
+		if( !geomShaderFile.empty() )
+			program->addShader(osg::Shader::readShaderFile(osg::Shader::GEOMETRY, geomShaderFile ));
+		else {
+			program->addShader(new osg::Shader(osg::Shader::GEOMETRY, geometryShaderSource));
+			OSG_WARN << "osgSprites::_init: Failed to find .geom shader '" << shaderBase << ".geom' using default" << std::endl;
+		}
+		//program->addBindAttribLocation("_spriteData", 5);
+		program->setParameter( GL_GEOMETRY_INPUT_TYPE_EXT, GL_POINTS );
+		program->setParameter( GL_GEOMETRY_OUTPUT_TYPE_EXT, GL_QUADS );
+		program->setParameter( GL_GEOMETRY_VERTICES_OUT_EXT, 4 );
+
+	}else if(_renderMode == RenderMode::POINT_SPRITES) {
+		/// Setup the point sprites
+		osg::PointSprite *sprite = new osg::PointSprite();
+		sset->setTextureAttributeAndModes(0, sprite, osg::StateAttribute::ON);
+		sset->setMode(GL_VERTEX_PROGRAM_POINT_SIZE, osg::StateAttribute::ON);
 	}
-	//program->addBindAttribLocation("_spriteData", 5);
-    program->setParameter( GL_GEOMETRY_INPUT_TYPE_EXT, GL_POINTS );
-    program->setParameter( GL_GEOMETRY_OUTPUT_TYPE_EXT, GL_QUADS );
-    program->setParameter( GL_GEOMETRY_VERTICES_OUT_EXT, 4 );
 }
 
 }
