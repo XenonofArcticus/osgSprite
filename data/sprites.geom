@@ -6,15 +6,6 @@
 uniform int palette_rows;
 uniform int palette_cols;
 
-//const int palette_rows = 1;
-//const int palette_cols = 1;
-
-//uniform float max_width;
-//uniform float max_height;
-
-//const float max_width = 1.0;
-//const float max_height = 2.0;
-
 void main(void)
 {
     if( palette_cols == 0 || palette_rows == 0 )

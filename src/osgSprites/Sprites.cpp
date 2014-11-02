@@ -132,7 +132,7 @@ void Sprites::setSpriteList( const SpriteDataList &l, const bool &useUpVector )
     _spriteDataList = l;
     _numSprites = _spriteDataList.size();
 
-	OSG_ALWAYS << "Sprites: Num Sprites: " << _numSprites << std::endl;
+	OSG_INFO << "Sprites: Num Sprites: " << _numSprites << std::endl;
 
     osg::Geometry *geom = new osg::Geometry;
     geom->setVertexArray( coords );

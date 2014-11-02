@@ -7,9 +7,6 @@ void main()
         discard;
     else
         gl_FragColor = rgba;
-        
-    //gl_FragColor = vec4( 1, 1, 1, 1 );
-	
 }
 
 

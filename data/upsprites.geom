@@ -6,15 +6,6 @@
 uniform int palette_rows;
 uniform int palette_cols;
 
-//const int palette_rows = 1;
-//const int palette_cols = 1;
-
-//uniform float max_width;
-//uniform float max_height;
-
-//const float max_width = 1.0;
-//const float max_height = 2.0;
-
 void main(void)
 {
     if( palette_cols == 0 || palette_rows == 0 )
@@ -45,13 +36,6 @@ void main(void)
 		vec4 p2 = p + (l * (w*0.5)) + (u * h); //top left
 		vec4 p3 = p + (l * -(w*0.5)) + (u * h); //top right
 		
-        /*vec4 p0 = gl_PositionIn[i];
-        p0.x -= w*0.5;
-        vec4 p1 = vec4( p0.x + w, p0.yzw );
-        vec4 p2 = vec4( p0.x, p0.y + h, p0.zw );
-        vec4 p3 = vec4( p1.x, p2.y, p0.zw );
-		*/
-
         gl_TexCoord[0] =  vec4( s0, t0, 0.0, 1.0 );
         gl_Position = gl_ProjectionMatrix * p0;
         EmitVertex();
