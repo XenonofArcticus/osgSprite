@@ -43,6 +43,8 @@ class OSGSPRITES_EXPORT Sprites: public osg::Geode
             float width;
             float height;
             unsigned int paletteIndex;
+			float userData;
+
             osg::Vec3f position;
 			osg::Vec3f up;
 
@@ -51,7 +53,8 @@ class OSGSPRITES_EXPORT Sprites: public osg::Geode
                 height(h),
 				paletteIndex(pi),
                 position(p),
-				up(osg::Vec3f(0,1,0))
+				up(osg::Vec3f(0,1,0)),
+				userData(0.0f)
             {}
 
 				SpriteData( float w, float h, unsigned int pi, const osg::Vec3f &p, const osg::Vec3f &u ):
@@ -59,7 +62,8 @@ class OSGSPRITES_EXPORT Sprites: public osg::Geode
                 height(h),
 				paletteIndex(pi),
                 position(p),
-				up(u)
+				up(u),
+				userData(0.0f)
             {}
 
             SpriteData() :
@@ -67,7 +71,8 @@ class OSGSPRITES_EXPORT Sprites: public osg::Geode
                 height(2.0),
                 paletteIndex(0),
                 position(osg::Vec3f(0,0,0)),
-				up(osg::Vec3f(0,1,0))
+				up(osg::Vec3f(0,1,0)),
+				userData(0.0f)
             {}
 
             SpriteData( const SpriteData &d ):
@@ -75,7 +80,8 @@ class OSGSPRITES_EXPORT Sprites: public osg::Geode
                 height(d.height),
                 paletteIndex(d.paletteIndex),
                 position(d.position),
-				up(d.up)
+				up(d.up),
+				userData(d.userData)
             {
             }
 
@@ -101,12 +107,16 @@ class OSGSPRITES_EXPORT Sprites: public osg::Geode
 
 		bool getUseUpVector() { return _useUpVector; }
 
+		void setClipTolerance(float clipTolerance);
+		float getClipTolerance();
+
+		void setTransparencyActive(bool isTransparent);
+
     private:
         SpriteDataList _spriteDataList;
         void _init(const std::string &shaderFile);
         osg::ref_ptr<TexturePalette> _texturePalette;
-        osg::ref_ptr<osg::Uniform> _palette_rows;
-        osg::ref_ptr<osg::Uniform> _palette_cols;
+		osg::ref_ptr<osg::Uniform> _clipTolerance;
 
         unsigned int _numSprites;
 

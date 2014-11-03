@@ -3,6 +3,7 @@
 #include <osg/StateSet>
 #include <osg/PointSprite>
 #include <osg/Point>
+#include <osg/BlendFunc>
 #include <osgDB/FileUtils>
 
 
@@ -22,16 +23,16 @@ static const char *geometryShaderSource =
     "#extension GL_EXT_gpu_shader4 : enable\n"
     "#extension GL_EXT_geometry_shader4 : enable\n"
     "\n"
-    "uniform int palette_rows;\n"
-    "uniform int palette_cols;\n"
+    "uniform int osgSprites_palette_rows;\n"
+    "uniform int osgSprites_palette_cols;\n"
     "\n"
     "void main(void)\n"
     "{\n"
-    "    if( palette_cols == 0 || palette_rows == 0 )\n"
+    "    if( osgSprites_palette_cols == 0 || osgSprites_palette_rows == 0 )\n"
     "        return;\n"
     "\n"
-    "    float sdiv = 1.0/palette_cols;\n"
-    "    float tdiv = 1.0/palette_rows;\n"
+    "    float sdiv = 1.0/osgSprites_palette_cols;\n"
+    "    float tdiv = 1.0/osgSprites_palette_rows;\n"
     "    for( int i=0; i< gl_VerticesIn; i++)\n"
     "    {\n"
     "        vec4 cc = gl_FrontColorIn[i];\n"
@@ -39,10 +40,10 @@ static const char *geometryShaderSource =
     "        float h   = cc[1];\n"
     "        int index =  int(cc[2]);\n"
     "\n"
-    "        float s0 = (index%palette_cols) * sdiv;\n"
-    "        float s1 = (index%palette_cols) * sdiv + sdiv;\n"
-    "        float t0 = (index/palette_cols) * tdiv;\n"
-    "        float t1 = (index/palette_cols) * tdiv + tdiv;\n"
+    "        float s0 = (index%osgSprites_palette_cols) * sdiv;\n"
+    "        float s1 = (index%osgSprites_palette_cols) * sdiv + sdiv;\n"
+    "        float t0 = (index/osgSprites_palette_cols) * tdiv;\n"
+    "        float t1 = (index/osgSprites_palette_cols) * tdiv + tdiv;\n"
     "\n"
     "        vec4 p0 = gl_PositionIn[i];\n"
     "        p0.x -= w*0.5;\n"
@@ -72,11 +73,12 @@ static const char *geometryShaderSource =
 
 
 static const char *fragmentShaderSource = 
-    "uniform sampler2D tex0;\n"
+    "uniform sampler2D osgSprites_tex0;\n"
+	"uniform float osgSprites_clipTolerance;\n"
     "void main()\n"
     "{\n"
-    "    vec4 rgba = texture2D( tex0, gl_TexCoord[0].st );\n"
-    "    if( rgba.a <= 0.58 )\n"
+    "    vec4 rgba = texture2D( osgSprites_tex0, gl_TexCoord[0].st );\n"
+    "    if( rgba.a <= osgSprites_clipTolerance )\n"
     "        discard;\n"
     "    else\n"
     "        gl_FragColor = rgba;\n"
@@ -112,9 +114,9 @@ void Sprites::setTexturePalette( TexturePalette *texturePalette )
     osg::StateSet *sset = getOrCreateStateSet();
 
     sset->setTextureAttribute( 0, _texturePalette.get() );
-    sset->addUniform( new osg::Uniform( "tex0", 0 ) );
-    sset->addUniform( new osg::Uniform( "palette_rows", (int)_texturePalette->getNumRows() ) );
-    sset->addUniform( new osg::Uniform( "palette_cols", (int)_texturePalette->getNumCols() ) );
+    sset->addUniform( new osg::Uniform( "osgSprites_tex0", 0 ) );
+    sset->addUniform( new osg::Uniform( "osgSprites_palette_rows", (int)_texturePalette->getNumRows() ) );
+    sset->addUniform( new osg::Uniform( "osgSprites_palette_cols", (int)_texturePalette->getNumCols() ) );
 }
 
 TexturePalette *Sprites::getTexturePalette() const
@@ -129,12 +131,12 @@ void Sprites::setSpriteList( const SpriteDataList &l, const bool &useUpVector )
 
     osg::Vec3Array *coords = new osg::Vec3Array;
 	osg::Vec3Array *ups = new osg::Vec3Array;
-    osg::Vec3Array *data = new osg::Vec3Array;
+    osg::Vec4Array *data = new osg::Vec4Array;
 
     for( osgSprites::Sprites::SpriteDataList::const_iterator p = l.begin(); p != l.end(); p++ )
     {
         coords->push_back(  p->position );
-        data->push_back( osg::Vec3f( p->width, p->height, float(p->paletteIndex) ) );
+		data->push_back( osg::Vec4f( p->width, p->height, float(p->paletteIndex), p->userData ) );
 		if(_useUpVector && _renderMode == GEOMETRY_SHADER_SPRITES)
 			ups->push_back(p->up);
     }
@@ -163,6 +165,28 @@ const Sprites::SpriteDataList &Sprites::getSpriteList() const
     return _spriteDataList;
 }
 
+void Sprites::setClipTolerance(float clipTolerance)
+{
+	_clipTolerance->set(clipTolerance);
+}
+
+float Sprites::getClipTolerance()
+{
+	float tolerance = 0.0f;
+	_clipTolerance->get(tolerance);
+	return tolerance;
+}
+
+void Sprites::setTransparencyActive(bool isTransparent)
+{
+	osg::StateSet *sset = getOrCreateStateSet();
+	osg::BlendFunc *func = new osg::BlendFunc(); 
+	func->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
+	sset->setAttributeAndModes(func);
+
+	sset->setMode(GL_BLEND, isTransparent ? osg::StateAttribute::ON : osg::StateAttribute::OFF); 
+}
+
 void Sprites::_init(const std::string &shaderFile)
 {
 	std::string defaultShader = _renderMode == GEOMETRY_SHADER_SPRITES ? "data/sprites" : "data/pointsprites";
@@ -172,6 +196,11 @@ void Sprites::_init(const std::string &shaderFile)
     osg::Program* program = new osg::Program;
     sset->setAttribute(program);
 
+	//create clip tolerance uniform
+	_clipTolerance = new osg::Uniform("osgSprites_clipTolerance", 0.2f);
+	sset->addUniform(_clipTolerance);
+
+	//load vert shader
     std::string vertShaderFile = osgDB::findDataFile( shaderBase + ".vert" );
     if( !vertShaderFile.empty() )
         program->addShader(osg::Shader::readShaderFile(osg::Shader::VERTEX, vertShaderFile ) );
@@ -180,6 +209,7 @@ void Sprites::_init(const std::string &shaderFile)
 		OSG_WARN << "osgSprites::_init: Failed to find .vert shader '" << shaderBase << ".vert' using default" << std::endl;
 	}
 
+	//load frag shader
     std::string fragShaderFile = osgDB::findDataFile( shaderBase + ".frag" );
     if( !fragShaderFile.empty() )
         program->addShader(osg::Shader::readShaderFile(osg::Shader::FRAGMENT, fragShaderFile ) );
@@ -189,6 +219,7 @@ void Sprites::_init(const std::string &shaderFile)
 
 	}
 
+	//load geom shader if using geometry shader rendering mode
 	if(_renderMode == GEOMETRY_SHADER_SPRITES)
 	{
 		std::string geomShaderFile = osgDB::findDataFile(shaderBase + ".geom");

@@ -1,2 +1,3 @@
 add_subdirectory( DotOsg )
-add_subdirectory( Program )
+add_subdirectory( Simple )
+add_subdirectory( Forest )

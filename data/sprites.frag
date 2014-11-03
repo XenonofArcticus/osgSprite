@@ -1,9 +1,10 @@
-uniform sampler2D tex0;
+uniform sampler2D osgSprites_tex0;
+uniform float osgSprites_clipTolerance;
 
 void main()
 {
-    vec4 rgba = texture2D( tex0, gl_TexCoord[0].st );
-    if( rgba.a <= 0.2 ) //need way to set this tolerance was .58 which resulted in nothing passing
+    vec4 rgba = texture2D( osgSprites_tex0, gl_TexCoord[0].st );
+    if( rgba.a <= osgSprites_clipTolerance ) //need way to set this tolerance was .58 which resulted in nothing passing
         discard;
     else
         gl_FragColor = rgba;

@@ -1,16 +1,16 @@
 #version 120
 #extension GL_EXT_gpu_shader4 : enable
 
-uniform int palette_rows;
-uniform int palette_cols;
+uniform int osgSprites_palette_rows;
+uniform int osgSprites_palette_cols;
 
 varying vec2 texcoordOffset;
 varying vec2 texcoordScale;
 
 void main()
 {
-    float sdiv = 1.0/palette_cols;
-    float tdiv = 1.0/palette_rows;
+    float sdiv = 1.0/osgSprites_palette_cols;
+    float tdiv = 1.0/osgSprites_palette_rows;
 	texcoordScale = vec2(sdiv,tdiv);
 
 	vec4 cc = gl_MultiTexCoord0;
@@ -18,8 +18,8 @@ void main()
 	float w   = cc[0];
     float h   = cc[1];
         
-	float s0 = (index%palette_cols) * sdiv;
-	float t0 = (index/palette_cols) * tdiv;
+	float s0 = (index%osgSprites_palette_cols) * sdiv;
+	float t0 = (index/osgSprites_palette_cols) * tdiv;
 		
 	texcoordOffset = vec2(s0, t0);
     gl_Position = ftransform();

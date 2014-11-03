@@ -7,47 +7,53 @@
 #include <osgGA/TrackballManipulator>
 #include <osgViewer/ViewerEventHandlers>
 
+static const std::string spriteSheet = "./data/trees.png";
+static const unsigned int spriteRows = 1;
+static const unsigned int spriteCols = 5;
+
 static const unsigned int numTrees = 1000000;
+
 
 osg::Geode *loadTrees()
 {
 
     // Invent some random tree positions 
-    float area = sqrt((double)numTrees) * 4.0;
+    float area = sqrt((double)numTrees) * 20.0;
     osgSprites::Sprites::SpriteDataList dataList;
     for( unsigned int i = 0; i < numTrees; i++ )
     {
         osgSprites::Sprites::SpriteData treeData;
 
-        treeData.width  = 5.0f + ((float)(rand()%1000)/1000.0f) * 20.0f;
-	    treeData.height = 10.0f + ((float)(rand()%1000)/1000.0f) * 40.0f;
+        treeData.width  = 10.0f + ((float)(rand()%1000)/1000.0f) * 40.0f;
+	    treeData.height = treeData.width; //make square
 
-	    treeData.paletteIndex = rand() % 5;
+	    treeData.paletteIndex = rand() % spriteCols;
+
+		//if using treessprites shader this sets the sway rate of the tree stored in texcoord0.w
+		treeData.userData = 1.0f + ((float)(rand()%1000)/1000.0f) * 2.0f;
 
         treeData.position[0] = -(area*0.5) + ((float)(rand() % 10000)/10000.0f) * area;
         treeData.position[1] = -(area*0.5) + ((float)(rand() % 10000)/10000.0f) * area;
         treeData.position[2] = 0.0f;
 
-		treeData.up = osg::Vec3(0,0,1);
+		treeData.up = osg::Vec3(0,0,1); //set the world up axis for the tree
 
         dataList.push_back( treeData );
     }
 
-
-    // Create the Sprite Trees
-	//osgSprites::Sprites * trees = new osgSprites::Sprites( dataList );//, "", false, osgSprites::Sprites::RenderMode::POINT_SPRITES );
-    osgSprites::Sprites * trees = new osgSprites::Sprites( dataList, "data/upsprites", true ); //sprites have fixed up axis
+	//use custom shader with fixed up that applies a sway to the trees
+	osgSprites::Sprites * trees = new osgSprites::Sprites( dataList, "data/treesprites", true );
 
     // Open the pallete texture
-    osg::ref_ptr<osg::Image> treePaletteImage = osgDB::readImageFile( osgDB::findDataFile("./data/trees.png") );
+    osg::ref_ptr<osg::Image> treePaletteImage = osgDB::readImageFile( osgDB::findDataFile(spriteSheet) );
     if( treePaletteImage.valid() )
     {
         // Make the Palette
-        osg::ref_ptr<osgSprites::TexturePalette> texturePalette = new osgSprites::TexturePalette( 1, 5, treePaletteImage.get() );
+        osg::ref_ptr<osgSprites::TexturePalette> texturePalette = new osgSprites::TexturePalette( spriteRows, spriteCols, treePaletteImage.get() );
         trees->setTexturePalette( texturePalette.get() );
     }
     else{
-        osg::notify( osg::WARN ) << "Can't open the tree palette image \"trees.png\"" << std::endl;
+        osg::notify( osg::WARN ) << "Can't open the tree palette image '" << spriteSheet << "'." << std::endl;
 		int t = 0;
 		std::cin >> t;
 	}
