@@ -11,7 +11,7 @@ static const std::string spriteSheet = "./data/glowsprites.png";
 static const unsigned int spriteRows = 1;
 static const unsigned int spriteCols = 4;
 
-static const unsigned int numSprites = 10000000;
+static const unsigned int numSprites = 1000000;
 static const float sphereInnerRadius = 900.0f;
 static const float sphereOutterRadius = 1000.0f;
 
