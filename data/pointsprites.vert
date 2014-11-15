@@ -24,11 +24,7 @@ void main()
 	texcoordOffset = vec2(s0, t0);
     gl_Position = ftransform();
 	
-	//gl_PointSize = w;// / gl_Position.w;
-	
 	float pointSize = abs(1600.0*w / gl_Position.w);
-
-    //gl_PointSize = max(ceil(pointSize),2);
     gl_PointSize = ceil(pointSize);
 }
 

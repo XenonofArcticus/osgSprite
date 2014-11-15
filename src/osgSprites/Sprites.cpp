@@ -147,6 +147,7 @@ void Sprites::setSpriteList( const SpriteDataList &l, const bool &useUpVector )
 	OSG_INFO << "Sprites: Num Sprites: " << _numSprites << std::endl;
 
     osg::Geometry *geom = new osg::Geometry;
+	geom->setUseVertexBufferObjects(true);
     geom->setVertexArray( coords );
 	geom->setTexCoordArray(0, data);
 	if(_useUpVector && _renderMode == GEOMETRY_SHADER_SPRITES)
@@ -177,7 +178,7 @@ float Sprites::getClipTolerance()
 	return tolerance;
 }
 
-void Sprites::setTransparencyActive(bool isTransparent)
+void Sprites::setAlphaEnabled(bool isTransparent)
 {
 	osg::StateSet *sset = getOrCreateStateSet();
 	osg::BlendFunc *func = new osg::BlendFunc(); 

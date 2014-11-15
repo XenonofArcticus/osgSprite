@@ -34,8 +34,9 @@ class OSGSPRITES_EXPORT Sprites: public osg::Geode
         META_Object( osgSprites, Sprites);
 
 		enum RenderMode {
-			GEOMETRY_SHADER_SPRITES,
-			POINT_SPRITES
+			GEOMETRY_SHADER_SPRITES, //use geomtery shader to generate sprite quads per point
+			POINT_SPRITES, //GL Sprites
+			POINTS //standard single pixel points
 		};
 
         struct SpriteData 
@@ -110,7 +111,7 @@ class OSGSPRITES_EXPORT Sprites: public osg::Geode
 		void setClipTolerance(float clipTolerance);
 		float getClipTolerance();
 
-		void setTransparencyActive(bool isTransparent);
+		void setAlphaEnabled(bool isTransparent);
 
     private:
         SpriteDataList _spriteDataList;

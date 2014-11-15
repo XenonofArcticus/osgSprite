@@ -53,7 +53,7 @@ osg::Geode *loadSprites()
     // Create the Sprites passing our list of data
 	osgSprites::Sprites * sprites = new osgSprites::Sprites( dataList ); //default geometry shader sprites with screen aligned up
 	//osgSprites::Sprites * sprites = new osgSprites::Sprites( dataList, "", false, osgSprites::Sprites::RenderMode::POINT_SPRITES ); //gl point sprites
-	sprites->setTransparencyActive(true);
+	sprites->setAlphaEnabled(true);
 	sprites->setClipTolerance(0.0f);
 
     // Open the pallete texture
