@@ -8,13 +8,14 @@
 #include <osgViewer/ViewerEventHandlers>
 
 #include "Utils.h"
+#include "GPUParticles.h"
 #include <Windows.h>
 
 static const std::string spriteSheet = "./data/glowsprites.png";
 static const unsigned int spriteRows = 1;
 static const unsigned int spriteCols = 4;
 
-static const unsigned int defaultParticleCount = 4000000;
+static const unsigned int defaultParticleCount = 1000000;
 
 
 osg::Node *createPreviewRenderGraph(DataTexture* texture)
@@ -34,7 +35,7 @@ osg::Node *createPreviewRenderGraph(DataTexture* texture)
 
 	osg::Geode* geode = new osg::Geode();
 	geode->addDrawable(osg::createTexturedQuadGeometry(osg::Vec3(0,0,0), osg::Vec3(w,0,0), osg::Vec3(0,h,0)));
-	//camera->addChild(geode);
+	camera->addChild(geode);
 
 	geode->getOrCreateStateSet()->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);
 	osg::Depth* depth = new osg::Depth();
@@ -46,37 +47,39 @@ osg::Node *createPreviewRenderGraph(DataTexture* texture)
 }
 
 
-
 osg::Node* createParticles(const unsigned int& numParticles)
 {
 	osg::Group* group = new osg::Group();
 
-	//create some random lifes for the particles, we will pass them as userData on the sprites stored in gl_MultiTexCoord0.w
-	std::vector<float> lifeTimes = randomRangeVector(numParticles, Rangef(10.0f,20.0f));
-
-	//create our node to run the particle program, has 2 channels for position and velocity
-	ComputeNode* computeNode = new ComputeNode(numParticles, "data/particleprogram", 2, true, &lifeTimes);
-
-	OSG_ALWAYS << "Simulating " << numParticles << " particles in data texture of size w: " << computeNode->_input[0]->getTextureWidth() << " h: " << computeNode->_input[0]->getTextureHeight() << std::endl;
-
-	//fill initial positions
-	computeNode->_input[0]->fillTextureRandomRange(Rangef(-10.0f,10.0f), Rangef(-10.0f,10.0f), Rangef(0.0f,20.0f));
-	//fill initial velocities
 	float vel = 10.0f;
 	Rangef startDelayRange = Rangef(-2.0f, -1.0f);
-	computeNode->_input[1]->fillTextureRandomRange(Rangef(-vel,vel), Rangef(-vel,vel), Rangef(vel*2,vel*5.0f), startDelayRange);
+	Rangef massRange = Rangef(0.5f,1.0f);
+	Rangef lifeRange = Rangef(1.0f, 5.0f);
+
+	//create our node to run the particle program
+	GPUParticles* particleNode = new GPUParticles(numParticles, "data/particleprogram-perfrag", massRange, lifeRange);
+	
+	OSG_ALWAYS << "Simulating " << numParticles << " particles in data texture of size w: " << particleNode->_input[0]->getTextureWidth() << " h: " << particleNode->_input[0]->getTextureHeight() << std::endl;
+
+	//fill initial positions
+	particleNode->_input[0]->fillTextureRandomRange(Rangef(-10.0f,10.0f), Rangef(-10.0f,10.0f), Rangef(0.0f,20.0f));
+	//fill initial velocities
+	particleNode->_input[1]->fillTextureRandomRange(Rangef(-vel,vel), Rangef(-vel,vel), Rangef(vel*2,vel*5.0f), startDelayRange);
 
 	//why do I need this? somethings wrong
-	for(unsigned int i=0; i<computeNode->_input.size(); i++)
-		computeNode->_output[i]->setImage(computeNode->_input[i]->getImage());
+	for(unsigned int i=0; i<particleNode->_input.size(); i++)
+		particleNode->_output[i]->setImage(particleNode->_input[i]->getImage());
 
-	group->addChild(computeNode);
+	group->addChild(particleNode);
+
+	//
+	//render the particles
 
 	//create the particle sprites that use the positions computed by our compute node
-	osgSprites::Sprites* particleSprites = computeNode->_output[0]->createParticleRenderSprites(numParticles, Rangef(0.1f,1.0f), "data/particlesprites");
+	osgSprites::Sprites* particleSprites = particleNode->createParticleRenderSprites(numParticles, Rangef(0.1f,1.0f), "data/particlesprites");
 	particleSprites->setAlphaEnabled(true);
 	//bind the positions texture
-	particleSprites->getOrCreateStateSet()->setTextureAttributeAndModes(1, computeNode->_output[0], osg::StateAttribute::ON);
+	particleSprites->getOrCreateStateSet()->setTextureAttributeAndModes(1, particleNode->_output[0], osg::StateAttribute::ON);
 	particleSprites->getOrCreateStateSet()->addUniform(new osg::Uniform("dataChannel0", 1));
 	
 	osg::Depth* depth = new osg::Depth();
@@ -89,7 +92,7 @@ osg::Node* createParticles(const unsigned int& numParticles)
 
 	group->addChild(particleSprites);
 
-	osg::Node* preview = createPreviewRenderGraph(computeNode->_output[0]);
+	osg::Node* preview = createPreviewRenderGraph(particleNode->_input[0]);
 	group->addChild(preview);
 
 	return group;
