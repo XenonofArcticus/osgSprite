@@ -92,10 +92,45 @@ osg::Node* createParticles(const unsigned int& numParticles)
 
 	group->addChild(particleSprites);
 
-	osg::Node* preview = createPreviewRenderGraph(particleNode->_input[0]);
-	group->addChild(preview);
+	//group->addChild(createPreviewRenderGraph(particleNode->_input[0]));
 
 	return group;
+}
+
+void setupViewerOnSingleScreen(osgViewer::Viewer* viewer, unsigned int screenID)
+{
+	unsigned int screenWidth, screenHeight;
+    osg::GraphicsContext::WindowingSystemInterface* wsi = osg::GraphicsContext::getWindowingSystemInterface();
+    wsi->getScreenResolution(osg::GraphicsContext::ScreenIdentifier(screenID), screenWidth, screenHeight);
+
+	OSG_ALWAYS << "Screen width " << screenWidth << " height " << screenHeight << std::endl;
+
+	osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
+    
+	// Setup the traits parameters
+	traits->x = 0;
+	traits->y = 0;
+	traits->width = screenWidth;
+	traits->height = screenHeight;
+	traits->depth = 24;
+	traits->alpha = 8;
+    traits->samples = 0;
+    traits->sampleBuffers = 0;
+	traits->stencil = 0;
+	traits->windowDecoration = false;
+	traits->doubleBuffer = true;
+	traits->vsync = false;
+	traits->sharedContext = 0;
+    
+	// Create the Graphics Context
+	osg::ref_ptr<osg::GraphicsContext> graphicsContext = osg::GraphicsContext::createGraphicsContext(traits.get());
+	
+	if(graphicsContext)
+        viewer->getCamera()->setGraphicsContext(graphicsContext);
+
+	viewer->getCamera()->setViewport(new osg::Viewport(0, 0, screenWidth, screenHeight));
+    viewer->getCamera()->setProjectionMatrixAsPerspective(45.0f,(float)screenWidth/screenHeight,
+                                                           0.1, 1000.0);
 }
 
 int main(int argc, char **argv)
@@ -110,6 +145,7 @@ int main(int argc, char **argv)
 		numParticles = readint;
 
     osgViewer::Viewer viewer;
+	setupViewerOnSingleScreen(&viewer, 0);
 	viewer.getCamera()->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
 	viewer.setCameraManipulator(new osgGA::TrackballManipulator());
     viewer.addEventHandler(new osgViewer::StatsHandler);

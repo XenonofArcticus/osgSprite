@@ -65,12 +65,12 @@ public:
 		image->allocateImage(this->getTextureWidth(), this->getTextureHeight(), 1, GL_RGBA, _isFloat ? GL_FLOAT : GL_UNSIGNED_BYTE);
 		this->setImage(0, image);
 		int i=0;
-		for(int r=0; r<image->s(); ++r)
+		for(int r=0; r<image->s() && i<fillData.size()-1; ++r)
 		{
 			if(_isFloat)
 			{
 				float* data = (float*)image->data(0, r);
-				for(int c=0; c<image->t(); ++c)
+				for(int c=0; c<image->t() && i<fillData.size()-1; ++c)
 				{
 					(*data) = fillData[i].x(); ++data;
 					(*data) = fillData[i].y(); ++data;
@@ -80,7 +80,7 @@ public:
 				}
 			}else{
 				unsigned char* data = (unsigned char*)image->data(0, r);
-				for(int c=0; c<image->t(); ++c)
+				for(int c=0; c<image->t() && i<fillData.size()-1; ++c)
 				{
 					(*data) = floor(fillData[i].x()*255.0f); ++data;
 					(*data) = floor(fillData[i].y()*255.0f); ++data;
