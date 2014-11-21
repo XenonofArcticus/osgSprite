@@ -9,7 +9,6 @@
 
 #include "Utils.h"
 #include "GPUParticles.h"
-#include <Windows.h>
 
 static const std::string spriteSheet = "./data/glowsprites.png";
 static const unsigned int spriteRows = 1;
