@@ -6,7 +6,7 @@ const unsigned int numTrees = 40000;
 
 int main( int argc, char **argv )
 {
-    float area = sqrt((float)numTrees) * 4.0;
+    float area = sqrt((float)numTrees) * 4.0f;
     for( unsigned int i = 0; i < numTrees; i++ )
     {
         float width  = 5.0f + ((float)(rand()%1000)/1000.0f) * 20.0f;
