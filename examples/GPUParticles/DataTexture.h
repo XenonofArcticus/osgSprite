@@ -64,13 +64,13 @@ public:
 		osg::Image* image = new osg::Image();
 		image->allocateImage(this->getTextureWidth(), this->getTextureHeight(), 1, GL_RGBA, _isFloat ? GL_FLOAT : GL_UNSIGNED_BYTE);
 		this->setImage(0, image);
-		int i=0;
-		for(int r=0; r<image->s() && i<fillData.size()-1; ++r)
+		unsigned int i=0;
+		for(unsigned int r=0; r<(unsigned int)image->s() && i<fillData.size()-1; ++r)
 		{
 			if(_isFloat)
 			{
 				float* data = (float*)image->data(0, r);
-				for(int c=0; c<image->t() && i<fillData.size()-1; ++c)
+				for(unsigned int c=0; c<(unsigned int)image->t() && i<fillData.size()-1; ++c)
 				{
 					(*data) = fillData[i].x(); ++data;
 					(*data) = fillData[i].y(); ++data;
@@ -80,7 +80,7 @@ public:
 				}
 			}else{
 				unsigned char* data = (unsigned char*)image->data(0, r);
-				for(int c=0; c<image->t() && i<fillData.size()-1; ++c)
+				for(unsigned int c=0; c<(unsigned int)image->t() && i<fillData.size()-1; ++c)
 				{
 					(*data) = floor(fillData[i].x()*255.0f); ++data;
 					(*data) = floor(fillData[i].y()*255.0f); ++data;
@@ -114,10 +114,8 @@ public:
 	osg::Vec2 computeClipSpaceForColRow(osg::Vec2 colRow)
 	{
 		osg::Vec2 uv = computeUVForColRow(colRow);
-		float hw = floor((float)this->getTextureWidth()*0.5f);
-		float hh = floor((float)this->getTextureHeight()*0.5f);
-		float x = (uv.x() * 2.0f) - 1.0f;// (colRow.x() / hw) - 1.0f;
-		float y = (uv.y() * 2.0f) - 1.0f;// (colRow.y() / hh) - 1.0f;
+		float x = (uv.x() * 2.0f) - 1.0f;
+		float y = (uv.y() * 2.0f) - 1.0f;
 		return osg::Vec2(x,y);
 	}
 
@@ -128,8 +126,6 @@ public:
 	//
 	osgSprites::Sprites::SpriteDataList createIndexDataList()
 	{
-		int cols = this->getTextureWidth();
-		int rows = this->getTextureHeight();
 		osgSprites::Sprites::SpriteDataList dataList;
 		for(unsigned int i = 0; i < _arraySize; i++ )
 		{

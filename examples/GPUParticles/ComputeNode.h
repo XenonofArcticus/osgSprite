@@ -118,12 +118,9 @@ public:
 		//must have an input texture
 		if(_input.size() == 0) return NULL;
 
-		int cols = _input[0]->getTextureWidth();
-		int rows = _input[0]->getTextureHeight();
-
 		osg::Vec4Array *verts = new osg::Vec4Array;
-		osg::Vec2 bottomLeft = osg::Vec2(-1.0f,-1.0f);//this->computeClipSpaceForColRow(this->computeColRowForIndex(0));
-		osg::Vec2 topRight = osg::Vec2(1.0f,1.0f);//this->computeClipSpaceForColRow(osg::Vec2(cols-1, rows-1));
+		osg::Vec2 bottomLeft = osg::Vec2(-1.0f,-1.0f);
+		osg::Vec2 topRight = osg::Vec2(1.0f,1.0f);
 
 		verts->push_back(osg::Vec4(bottomLeft.x(), bottomLeft.y(), 0.0f, 1.0f));
 		verts->push_back(osg::Vec4(topRight.x(), bottomLeft.y(), 0.0f, 1.0f));
@@ -132,8 +129,8 @@ public:
 
 		//
 		osg::Vec4Array *coords = new osg::Vec4Array;
-		osg::Vec2 bottomLeftUV = osg::Vec2(0.0f,0.0f);//this->computeUVForColRow(this->computeColRowForIndex(0));
-		osg::Vec2 topRightUV = osg::Vec2(1.0f,1.0f);//this->computeUVForColRow(osg::Vec2(cols-1, rows-1));
+		osg::Vec2 bottomLeftUV = osg::Vec2(0.0f,0.0f);
+		osg::Vec2 topRightUV = osg::Vec2(1.0f,1.0f);
 
 		coords->push_back(osg::Vec4(bottomLeftUV.x(), bottomLeftUV.y(), 0, 0));
 		coords->push_back(osg::Vec4(topRightUV.x(), bottomLeftUV.y(), 0, 0));

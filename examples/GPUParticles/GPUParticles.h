@@ -39,8 +39,6 @@ public:
 	{
 		if(_input.size() == 0) return NULL;
 
-		int cols = _input[0]->getTextureWidth();
-		int rows = _input[0]->getTextureHeight();
 		osgSprites::Sprites::SpriteDataList dataList;
 		for(unsigned int i = 0; i < spriteCount; i++ )
 		{
