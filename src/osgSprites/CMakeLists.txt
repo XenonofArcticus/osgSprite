@@ -33,4 +33,13 @@ LINK_WITH_VARIABLES(${LIB_NAME} OSG_LIBRARY OSGDB_LIBRARY OPENTHREADS_LIBRARY)
 
 LINK_CORELIB_DEFAULT(${LIB_NAME} ${CMAKE_THREAD_LIBS_INIT} ${MATH_LIBRARY})
 
+# Although most parts of this project use macros defined in
+# $PROJECT/CMakeModules/osgSpriteMacroUtils, the core library itself has no single
+# SETUP_ macro that will handle the installation details. For this reason, we'll
+# put the install directives directly into this CMakeLists file (for now).
+INSTALL(TARGETS ${LIB_NAME}
+	ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+	LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+	RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+)
 
